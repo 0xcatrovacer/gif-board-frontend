@@ -1,12 +1,14 @@
 import twitterLogo from "./assets/twitter-logo.svg";
 import "./App.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Constants
 const TWITTER_HANDLE = "0xcatrovacer";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 const App = () => {
+    const [walletAddress, setWalletAddress] = useState(null);
+
     const checkIfWalletIsConnected = async () => {
         try {
             const { solana } = window;
@@ -17,8 +19,10 @@ const App = () => {
 
                     const res = await solana.connect({ onlyIfTrusted: true });
                     console.log(
-                        "connected with Public Key: ".res.publicKey.toString()
+                        "connected with Public Key: ",
+                        res.publicKey.toString()
                     );
+                    setWalletAddress(res.publicKey.toString());
                 }
             } else {
                 alert("Solana Object not found!! Get a Phantom wallet");
@@ -28,7 +32,18 @@ const App = () => {
         }
     };
 
-    const connectWallet = async () => {};
+    const connectWallet = async () => {
+        const { solana } = window;
+
+        if (solana) {
+            const res = await solana.connect();
+            console.log(
+                "connected with Public Key: ",
+                res.publicKey.toString()
+            );
+            setWalletAddress(res.publicKey.toString());
+        }
+    };
 
     const renderNotConnectedContainer = () => (
         <button
@@ -49,13 +64,13 @@ const App = () => {
 
     return (
         <div className="App">
-            <div className="container">
+            <div className={walletAddress ? "authed-container" : "container"}>
                 <div className="header-container">
                     <p className="header">🖼 GIF Portal</p>
                     <p className="sub-text">
                         View your GIF collection in the metaverse ✨
                     </p>
-                    {renderNotConnectedContainer()}
+                    {!walletAddress && renderNotConnectedContainer()}
                 </div>
                 <div className="footer-container">
                     <img
